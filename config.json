@@ -1,0 +1,5 @@
+{
+    "EMAIL_HOST": "imap.gmail.com",
+    "EMAIL_USERNAME": "mac@machowe.com",
+    "SCAN_TIME": "09:00"
+}
