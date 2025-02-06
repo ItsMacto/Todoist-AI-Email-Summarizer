@@ -172,3 +172,4 @@ cython_debug/
 repomix-output.txt
 config.json
 credentials.json
+token.json

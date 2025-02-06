@@ -17,6 +17,11 @@ class ConfigManager:
             'validator': lambda x: len(x.strip()) > 0,
             'is_secret': True
         },
+            'GEMINI_API_KEY': {
+            'prompt': 'Enter your Gemini API key:',
+            'validator': lambda x: len(x.strip()) > 0,
+            'is_secret': True
+        },
         'SCAN_TIME': {
             'prompt': 'Enter the daily scan time (24-hour format, e.g., 09:00):',
             'default': '09:00',
