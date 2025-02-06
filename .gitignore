@@ -171,4 +171,4 @@ cython_debug/
 .pypirc
 repomix-output.txt
 config.json
-
+credentials.json

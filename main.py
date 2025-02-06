@@ -6,6 +6,7 @@ import time
 from src.config.manager import ConfigManager
 from src.utils.logger import logger
 from src.services.email_service import EmailService
+from src.services.summary_service import SummaryService
 
 # Add the project root directory to the Python path
 project_root = Path(__file__).parent
@@ -21,6 +22,9 @@ def run_daily_summary():
         try:
             emails = email_service.fetch_recent_emails(days=1)
             logger.info(f"Fetched {len(emails)} recent emails.")
+            print(emails)
+            summary_prompt = SummaryService.compile_emails(emails)
+            print(summary_prompt)
             # TODO: Process emails (e.g., summarization, create Todoist task, etc.)
         except Exception as e:
             logger.error(f"Error in daily summary process: {e}")

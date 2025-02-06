@@ -1,6 +1,6 @@
 
 
-class summery_service:
+class SummaryService:
     def compile_emails(emails):
         """
         Generate a bullet-point summary for a list of emails using an LLM.
