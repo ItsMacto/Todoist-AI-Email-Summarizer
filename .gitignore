@@ -170,3 +170,5 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 repomix-output.txt
+config.json
+

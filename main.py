@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 import sys
 from pathlib import Path
-
-# Add the project root directory to Python path
-project_root = Path(__file__).parent
-sys.path.insert(0, str(project_root))
-
 import schedule
 import time
-from src import ConfigManager, logger
-from src.services import EmailService
+from src.config.manager import ConfigManager
+from src.utils.logger import logger
+from src.services.email_service import EmailService
+
+# Add the project root directory to the Python path
+project_root = Path(__file__).parent
+sys.path.insert(0, str(project_root))
 
 def run_daily_summary():
     """Execute the daily email summary process."""
@@ -19,40 +19,37 @@ def run_daily_summary():
     
     if email_service.connect():
         try:
-            # TODO: Implement email processing and summarization
-            pass
+            emails = email_service.fetch_recent_emails(days=1)
+            logger.info(f"Fetched {len(emails)} recent emails.")
+            # TODO: Process emails (e.g., summarization, create Todoist task, etc.)
         except Exception as e:
             logger.error(f"Error in daily summary process: {e}")
         finally:
             email_service.disconnect()
     else:
-        logger.error("Failed to connect to email server")
+        logger.error("Failed to connect to Gmail API")
 
 def main():
     """Main application entry point."""
-    # Initialize configuration
     config_manager = ConfigManager()
     
-    # Handle configuration commands if any
     if len(sys.argv) > 1:
         config_manager.setup_cli()
         return
-
-    # Check if application is configured
+    
     if not config_manager.is_configured():
         print("Initial configuration required.")
         config_manager.initial_setup()
     
     logger.info("Email Summary Manager started")
     
-    # Schedule daily run
-    scan_time = os.getenv('SCAN_TIME', '09:00')
+    # Load configuration from the config file.
+    config = config_manager.load_config()
+    scan_time = config.get('SCAN_TIME', '09:00')
     schedule.every().day.at(scan_time).do(run_daily_summary)
     
-    # Run immediately on startup
     run_daily_summary()
     
-    # Keep the script running
     while True:
         schedule.run_pending()
         time.sleep(60)

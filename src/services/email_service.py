@@ -40,7 +40,8 @@ class EmailService:
                     self.creds.refresh(Request())
                 else:
                     flow = InstalledAppFlow.from_client_secrets_file(self.credentials_file, self.SCOPES)
-                    self.creds = flow.run_local_server(port=0)
+                    # Request offline access so that we get a refresh token.
+                    self.creds = flow.run_local_server(port=0, access_type='offline', prompt='consent')
                 # Save the credentials for the next run.
                 with open(self.token_file, 'wb') as token:
                     pickle.dump(self.creds, token)
@@ -60,15 +61,35 @@ class EmailService:
     def fetch_recent_emails(self, days=1):
         """
         Fetch emails received in the last `days` days.
-        Uses Gmail's query syntax ("newer_than:Nd") for filtering.
+        Uses Gmail's query syntax for filtering based on configuration.
         """
         if not self.service:
             logger.error("Gmail service not connected.")
             return []
 
         try:
-            # Use Gmail search query to get messages newer than the specified days.
-            query = f"newer_than:{days}d"
+            # Load configuration to get filtering options
+            from src.config.manager import ConfigManager
+            config = ConfigManager().load_config()
+
+            filters = [f"newer_than:{days}d"]
+
+            # If EXCLUDE_READ is true, only fetch unread OR important emails.
+            if config.get('EXCLUDE_READ', 'yes').lower() == 'yes':
+                filters.append("((is:unread) OR (is:important))")
+
+            # If EXCLUDE_SPAM is true, exclude spam.
+            if config.get('EXCLUDE_SPAM', 'yes').lower() == 'yes':
+                filters.append("-in:spam")
+
+            # If EXCLUDE_PROMOTIONAL is true, exclude promotional emails.
+            if config.get('EXCLUDE_PROMOTIONAL', 'yes').lower() == 'yes':
+                filters.append("-category:promotions")
+
+            # Combine filters into a query string
+            query = " ".join(filters)
+            logger.info(f"Gmail query: {query}")
+
             results = self.service.users().messages().list(userId='me', q=query).execute()
             messages = results.get('messages', [])
             emails = []
@@ -80,13 +101,16 @@ class EmailService:
                 subject = next((h['value'] for h in headers if h['name'].lower() == 'subject'), 'No subject')
                 sender = next((h['value'] for h in headers if h['name'].lower() == 'from'), 'Unknown sender')
                 date = next((h['value'] for h in headers if h['name'].lower() == 'date'), '')
-                # For simplicity, we use the Gmail snippet as the email body.
+                # Determine if the email is marked as important
+                important = any(h.get('name', '').lower() == 'importance' and 'important' in h.get('value', '').lower() for h in headers)
                 body = msg.get('snippet', '')
+
                 emails.append({
                     'subject': subject,
                     'from': sender,
                     'date': date,
-                    'body': body
+                    'body': body,
+                    'important': important
                 })
             return emails
 
