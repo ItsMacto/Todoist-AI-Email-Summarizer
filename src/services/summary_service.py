@@ -30,7 +30,7 @@ class SummaryService:
             for email in regular_emails:
                 prompt += f"\nFrom: {email['from']}\nSubject: {email['subject']}\n"
 
-        prompt += "\nProvide a focused summary following the required format:"
+        prompt += "\nProvide a focused summary following the required format"
         return prompt
 
 
@@ -61,3 +61,5 @@ class SummaryService:
             logger.error(f"Error calling Gemini API: {e}")
             return None
 
+    def summarize(email):
+        return SummaryService.call_gemini(SummaryService.create_prompt(email))
