@@ -10,7 +10,7 @@ from src.utils.logger import logger
 class ConfigManager:
     """Manages application configuration and settings using a JSON config file."""
     
-    # Only include keys that the application actually needs.
+    # Updated schema: removed Gmail credential path settings.
     CONFIG_SCHEMA = {
         'TODOIST_API_KEY': {
             'prompt': 'Enter your Todoist API key:',
@@ -21,18 +21,6 @@ class ConfigManager:
             'prompt': 'Enter the daily scan time (24-hour format, e.g., 09:00):',
             'default': '09:00',
             'validator': lambda x: re.match(r'^([01]?[0-9]|2[0-3]):[0-5][0-9]$', x),
-            'is_secret': False
-        },
-        'GMAIL_CREDENTIALS_PATH': {
-            'prompt': 'Enter the path to your Gmail API credentials file:',
-            'default': 'credentials.json',
-            'validator': lambda x: len(x.strip()) > 0,
-            'is_secret': False
-        },
-        'GMAIL_TOKEN_PATH': {
-            'prompt': 'Enter the path for storing your Gmail OAuth token:',
-            'default': 'token.json',
-            'validator': lambda x: len(x.strip()) > 0,
             'is_secret': False
         },
         'EXCLUDE_READ': {

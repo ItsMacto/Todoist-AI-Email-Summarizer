@@ -8,7 +8,6 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
-
 class EmailService:
     """
     Handles email operations using the Gmail API with OAuth2.
@@ -19,11 +18,13 @@ class EmailService:
     # If you only need read access, this scope is sufficient.
     SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
+    # Hardcoded paths for the credentials and token files.
+    CREDENTIALS_FILE = 'credentials.json'
+    TOKEN_FILE = 'token.json'
+
     def __init__(self):
-        # Token file stores the user's access and refresh tokens.
-        self.token_file = 'token.json'
-        # This file should be downloaded from Google Cloud Console
-        self.credentials_file = 'credentials.json'
+        self.token_file = EmailService.TOKEN_FILE
+        self.credentials_file = EmailService.CREDENTIALS_FILE
         self.creds = None
         self.service = None
 
@@ -101,7 +102,6 @@ class EmailService:
                 subject = next((h['value'] for h in headers if h['name'].lower() == 'subject'), 'No subject')
                 sender = next((h['value'] for h in headers if h['name'].lower() == 'from'), 'Unknown sender')
                 date = next((h['value'] for h in headers if h['name'].lower() == 'date'), '')
-                # Determine if the email is marked as important
                 important = any(h.get('name', '').lower() == 'importance' and 'important' in h.get('value', '').lower() for h in headers)
                 body = msg.get('snippet', '')
 
