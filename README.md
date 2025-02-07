@@ -1,4 +1,4 @@
-# Email Summary Manager
+# Todoist AI Email Summarizer
 
 A Python application that automatically fetches your emails with the Gmail API, generates AI-powered summaries using Gemini LLM, and creates daily task summaries in Todoist.
 
