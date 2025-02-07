@@ -173,3 +173,5 @@ repomix-output.txt
 config.json
 credentials.json
 token.json
+Pipfile
+Pipfile.lock
