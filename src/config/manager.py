@@ -17,13 +17,19 @@ class ConfigManager:
             'validator': lambda x: len(x.strip()) > 0,
             'is_secret': True
         },
-            'GEMINI_API_KEY': {
+        'GEMINI_API_KEY': {
             'prompt': 'Enter your Gemini API key:',
             'validator': lambda x: len(x.strip()) > 0,
             'is_secret': True
         },
+        'RUN_MODE': {
+            'prompt': 'Enter run mode (once/continuous):',
+            'default': 'continuous',
+            'validator': lambda x: x.strip().lower() in ['once', 'continuous'],
+            'is_secret': False
+        },
         'SCAN_TIME': {
-            'prompt': 'Enter the daily scan time (24-hour format, e.g., 09:00):',
+            'prompt': 'Enter the daily scan time if continuous (24-hour format, e.g., 09:00):',
             'default': '09:00',
             'validator': lambda x: re.match(r'^([01]?[0-9]|2[0-3]):[0-5][0-9]$', x),
             'is_secret': False
@@ -45,7 +51,8 @@ class ConfigManager:
             'default': 'yes',
             'validator': lambda x: x.strip().lower() in ['yes', 'no'],
             'is_secret': False
-        }
+        },
+
     }
     
     def __init__(self):
@@ -128,9 +135,10 @@ class ConfigManager:
         parser.add_argument('--init', action='store_true', help='Run initial setup')
         parser.add_argument('--update', nargs=2, metavar=('KEY', 'VALUE'), help='Update a specific setting')
         parser.add_argument('--show', action='store_true', help='Show current configuration')
-    
+        parser.add_argument('--once', action='store_true', help='Run the daily summary process once and exit')
+
         args = parser.parse_args()
-    
+
         if args.init:
             self.initial_setup()
         elif args.update:
@@ -141,5 +149,8 @@ class ConfigManager:
                 logger.error(f"Failed to update {key}")
         elif args.show:
             self.print_current_config()
+        elif args.once:
+            self.update_setting('RUN_MODE', 'once')
+            logger.info("Set to run once mode")
         else:
             parser.print_help()
